@@ -95,6 +95,9 @@ export function MoodProvider({
   return (
     <MoodContext.Provider value={value}>
       {children}
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        Mood: {MOODS[mood].label}
+      </div>
       <div
         ref={curtainRef}
         data-mood={incoming ?? mood}

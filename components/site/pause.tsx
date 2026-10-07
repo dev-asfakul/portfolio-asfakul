@@ -18,10 +18,11 @@ export function Pause({ meme, glyph }: { meme?: Meme; glyph?: CharacterMoment })
 
   useGSAP(
     () => {
-      gsap.matchMedia().add(FULL_MOTION, () => {
+      const mm = gsap.matchMedia()
+      mm.add(FULL_MOTION, () => {
         const tl = gsap.timeline({
           defaults: { ease: 'none' },
-          scrollTrigger: { trigger: ref.current, start: 'top top', end: meme ? '+=180%' : '+=90%', pin: true, scrub: config.motion.scrub },
+          scrollTrigger: { trigger: ref.current, start: 'top top', end: meme ? '+=180%' : '+=90%', pin: true, scrub: config.motion.scrub, invalidateOnRefresh: true, immediateRender: false },
         })
         tl.from('[data-wait-word]', { yPercent: 120, stagger: 0.15, duration: 0.4 })
         if (meme) {
@@ -34,6 +35,7 @@ export function Pause({ meme, glyph }: { meme?: Meme; glyph?: CharacterMoment })
         }
         tl.to('[data-wait-word]', { yPercent: -120, stagger: 0.08, duration: 0.4 }, meme ? '<' : '>')
       })
+      return () => mm.revert()
     },
     { scope: ref, dependencies: [meme?.id] },
   )

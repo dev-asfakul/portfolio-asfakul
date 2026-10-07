@@ -3,6 +3,8 @@ import NextAuth from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
 import { z } from 'zod'
 import { consumeLoginAttempt, isSessionRevoked, revokeSession, clearSessionRevocation } from '@/lib/auth/rate-limit'
+import { requireService } from '@/lib/env'
+import { AppError } from '@/lib/errors'
 
 const credentialsSchema = z.object({
   email: z.string().trim().toLowerCase().email().max(320),
@@ -72,5 +74,6 @@ export async function isAdmin() {
 }
 
 export async function requireAdmin() {
-  if (!(await isAdmin())) throw new Error('Unauthorized')
+  requireService('auth')
+  if (!(await isAdmin())) throw new AppError('UNAUTHORIZED', 'Admin authorization is required.')
 }

@@ -32,26 +32,34 @@ export function Glyph({
       if (!el) return
       if (trigger === 'section-entry') {
         let step = 0
-        ScrollTrigger.create({
+        let intervalId: number | undefined
+        const entry = ScrollTrigger.create({
           trigger: el,
           start: 'top 70%',
+          end: 'bottom 30%',
           once: true,
+          invalidateOnRefresh: true,
           onEnter: () => {
-            const id = window.setInterval(() => {
+            intervalId = window.setInterval(() => {
               step += 1
               setIndex(Math.min(step, frames.length - 1))
-              if (step >= frames.length - 1) window.clearInterval(id)
+              if (step >= frames.length - 1 && intervalId) window.clearInterval(intervalId)
             }, 420)
           },
         })
-        return
+        return () => {
+          if (intervalId) window.clearInterval(intervalId)
+          entry.kill()
+        }
       }
-      ScrollTrigger.create({
+      const progress = ScrollTrigger.create({
         trigger: el,
         start: 'top 80%',
         end: 'bottom 20%',
+        invalidateOnRefresh: true,
         onUpdate: (self) => setIndex(Math.min(frames.length - 1, Math.floor(self.progress * frames.length))),
       })
+      return () => progress.kill()
     },
     { dependencies: [frames.length, trigger] },
   )

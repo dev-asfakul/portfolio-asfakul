@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { useMood } from '@/components/mood/mood-provider'
 import { MOODS } from '@/lib/mood/moods'
-import { gsap, prefersReducedMotion } from '@/lib/motion/gsap'
+import { gsap, prefersReducedMotion, ScrollTrigger } from '@/lib/motion/gsap'
 import { cn } from '@/lib/utils'
 
 const LINKS = [
@@ -17,13 +17,17 @@ const LINKS = [
 function ScrollPercent() {
   const [value, setValue] = useState(0)
   useEffect(() => {
-    const onScroll = () => {
-      const max = document.documentElement.scrollHeight - window.innerHeight
-      setValue(max > 0 ? Math.round((window.scrollY / max) * 100) : 0)
+    const trigger = ScrollTrigger.create({
+      trigger: document.documentElement,
+      start: 'top top',
+      end: 'bottom bottom',
+      onUpdate: (self) => setValue(Math.round(self.progress * 100)),
+    })
+    const frame = window.requestAnimationFrame(() => trigger.update())
+    return () => {
+      window.cancelAnimationFrame(frame)
+      trigger.kill()
     }
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
   }, [])
   return <span className="tabular-nums">{String(value).padStart(3, '0')}%</span>
 }
@@ -46,6 +50,22 @@ export function SiteNav({ shortName, resumeUrl, resumeLabel }: { shortName: stri
       if (e.key === 'Escape') {
         setOpen(false)
         triggerRef.current?.focus()
+        return
+      }
+
+      if (e.key !== 'Tab' || !panel) return
+      const focusable = Array.from(
+        panel.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'),
+      )
+      if (!focusable.length) return
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
       }
     }
     document.addEventListener('keydown', onKey)
@@ -83,6 +103,7 @@ export function SiteNav({ shortName, resumeUrl, resumeLabel }: { shortName: stri
               type="button"
               onClick={() => setOpen(true)}
               aria-haspopup="dialog"
+              aria-controls="mood-dialog"
               aria-expanded={open}
               className="group flex items-center gap-2"
             >
@@ -97,6 +118,7 @@ export function SiteNav({ shortName, resumeUrl, resumeLabel }: { shortName: stri
       {open ? (
         <div
           ref={panelRef}
+          id="mood-dialog"
           role="dialog"
           aria-modal="true"
           aria-label="Change mood"

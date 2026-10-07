@@ -100,14 +100,16 @@ export function useSceneScroll({
   scene,
   mood,
   rootRef,
+  enabled = true,
 }: {
   scene: SceneId
   mood: Mood
   rootRef: RefObject<HTMLElement | null>
+  enabled?: boolean
 }) {
   useEffect(() => {
     const root = rootRef.current
-    if (!root) return
+    if (!enabled || !root) return
 
     const mm = gsap.matchMedia()
     mm.add(REDUCED, () => {
@@ -121,5 +123,5 @@ export function useSceneScroll({
     })
 
     return () => mm.revert()
-  }, [mood, rootRef, scene])
+  }, [enabled, mood, rootRef, scene])
 }

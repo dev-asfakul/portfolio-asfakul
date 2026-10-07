@@ -213,6 +213,7 @@ export async function deleteMessage(id: string): Promise<SaveResult> {
 }
 
 export async function logout() {
+  await requireAdmin()
   await revokeSession('admin')
   await signOut({ redirectTo: '/admin/login' })
 }

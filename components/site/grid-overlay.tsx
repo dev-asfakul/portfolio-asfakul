@@ -10,7 +10,8 @@ export function GridOverlay() {
 
   useGSAP(
     () => {
-      gsap.matchMedia().add(FULL_MOTION, () => {
+      const mm = gsap.matchMedia()
+      mm.add(FULL_MOTION, () => {
         gsap.from('span', {
           scaleY: 0,
           transformOrigin: 'top',
@@ -22,10 +23,11 @@ export function GridOverlay() {
           gsap.to('span', {
             yPercent: (i) => (i % 2 ? -6 : 6),
             ease: 'none',
-            scrollTrigger: { start: 0, end: 'max', scrub: true },
+            scrollTrigger: { start: 'top top', end: 'bottom bottom', scrub: 0.8, invalidateOnRefresh: true, immediateRender: false },
           })
         }
       })
+      return () => mm.revert()
     },
     { scope: ref, dependencies: [config.id] },
   )

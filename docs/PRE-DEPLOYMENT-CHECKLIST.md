@@ -12,6 +12,10 @@
 - [x] `pnpm build` passes.
 - [x] Home and About routes render in the browser at desktop and mobile dark viewports.
 - [x] Hero scroll manager has one scene-scoped `gsap.matchMedia()` scope, cleanup, and reduced-motion branches.
+- [x] Shared reveal/stagger primitives gate GSAP to desktop + reduced-motion-safe conditions and revert their matchMedia contexts.
+- [x] Phase 2 motion engine core now includes requested GSAP plugin registration, motion tokens, Lenis bridge, route refresh, derived verb offsets, ScrollTrigger progress, and `?perf=1` active-trigger overlay.
+- [x] Phase 2 motion evidence captured at 1440×900 desktop and 375×800 mobile; `/admin` still resolves through the protected login gate.
+- [ ] Phase 2 full closure remains open: production triggers were refactored and measured in `docs/evidence/phase-2-closeout.md`; historical before-baseline, complete desktop/mobile reverse/restart captures, route × mood × breakpoint archive, and throttled/physical FPS evidence remain required.
 - [x] Mood evidence exists for Editorial, Quiet, and Play hero states.
 - [x] Admin routes are protected by the existing login gate.
 - [x] `.env.example` exists and contains variable names only.

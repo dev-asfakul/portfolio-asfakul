@@ -53,14 +53,14 @@ export function Hero({ identity, about, glyph }: { identity: Identity; about: Ab
           .from('[data-hero-meta]', { autoAlpha: 0, y: 12, stagger: 0.06, duration: 0.8 }, 0.5)
 
         if (variant === 'still') {
-          gsap.to('[data-line="a"]', { yPercent: -18, ease: 'none', scrollTrigger: { trigger: ref.current, start: 'top top', end: 'bottom top', scrub: true } })
-          gsap.to('[data-portrait]', { yPercent: 14, ease: 'none', scrollTrigger: { trigger: ref.current, start: 'top top', end: 'bottom top', scrub: true } })
+          gsap.to('[data-line="a"]', { yPercent: -18, ease: 'none', scrollTrigger: { trigger: ref.current, start: 'top top', end: 'bottom top', scrub: 0.8, invalidateOnRefresh: true, immediateRender: false } })
+          gsap.to('[data-portrait]', { yPercent: 14, ease: 'none', scrollTrigger: { trigger: ref.current, start: 'top top', end: 'bottom top', scrub: 0.8, invalidateOnRefresh: true, immediateRender: false } })
           return
         }
 
         const tl = gsap.timeline({
           defaults: { ease: 'none' },
-          scrollTrigger: { trigger: ref.current, start: 'top top', end: '+=110%', pin: true, scrub: config.motion.scrub },
+          scrollTrigger: { trigger: ref.current, start: 'top top', end: '+=110%', pin: true, scrub: config.motion.scrub, invalidateOnRefresh: true, immediateRender: false },
         })
         tl.to('[data-line="a"]', { xPercent: variant === 'split' ? -38 : -10, yPercent: variant === 'stack' ? -30 : 0 }, 0)
           .to('[data-line="b"]', { xPercent: variant === 'split' ? 38 : 10, yPercent: variant === 'stack' ? 30 : 0 }, 0)

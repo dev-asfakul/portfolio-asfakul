@@ -10,6 +10,10 @@ A modular Next.js 16 portfolio and studio site for a creative web designer and d
 - **Design:** semantic tokens live in `app/globals.css`; mood definitions live in `lib/mood`; GSAP primitives live in `lib/motion`. Motion must respect reduced-motion preferences.
 - **Security:** authenticate, authorize, validate, then perform data access. Never expose secrets or trust client input.
 
+## Dev CMS fixtures
+
+Run `pnpm seed:dev` to idempotently upsert the three draft case-study fixtures (`paper-trail`, `signal-garden`, and `quiet-objects`) into the configured MongoDB Atlas `projects` collection. The script includes only the fields needed by the case-study template, leaves process/outcomes/gallery empty for empty-state coverage, and refuses to run when `NODE_ENV=production` unless `--force` is explicitly supplied.
+
 ## Local setup
 
 Use Node and pnpm matching `package.json` and install dependencies with `pnpm install`. Copy `.env.example` to `.env.local` and provide values. Development/preview can intentionally run with explicit service fallbacks; production fails fast when required configuration is missing.

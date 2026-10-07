@@ -23,14 +23,16 @@ export function MemeFigure({ meme, className, animate = true }: { meme: Meme; cl
   useGSAP(
     () => {
       if (!animate) return
-      gsap.matchMedia().add(FULL_MOTION, () => {
+      const mm = gsap.matchMedia()
+      mm.add(FULL_MOTION, () => {
         gsap.from(ref.current, {
           ...ENTRANCES[meme.animation ?? 'pop'],
           duration: (meme.duration ?? 0) > 0 ? meme.duration : config.motion.duration,
           ease: ENTRANCES[meme.animation ?? 'pop'].ease ?? config.motion.ease,
-          scrollTrigger: { trigger: ref.current, start: 'top 85%', once: true },
+          scrollTrigger: { trigger: ref.current, start: 'top 85%', end: 'bottom 15%', toggleActions: 'play none none reverse', invalidateOnRefresh: true, immediateRender: false },
         })
       })
+      return () => mm.revert()
     },
     { scope: ref, dependencies: [meme.id] },
   )

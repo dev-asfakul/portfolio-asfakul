@@ -5,6 +5,7 @@ export type AppErrorCode =
   | 'CONFLICT'
   | 'DEPENDENCY_UNAVAILABLE'
   | 'INTERNAL_ERROR'
+  | 'UNAUTHORIZED'
 
 export class AppError extends Error {
   constructor(

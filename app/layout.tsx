@@ -5,8 +5,11 @@ import { cookies } from 'next/headers'
 import { resolveIdentity } from '@/lib/brand'
 import { getAbout, getMoodSettings, getSettings } from '@/lib/cms/queries'
 import { thumbnail } from '@/lib/media/image'
-import { isMoodId, MOOD_COOKIE, moodStyleSheet, resolveMoods } from '@/lib/mood/moods'
+import { isMoodId, MOOD_COOKIE, MOODS, moodStyleSheet, resolveMoods } from '@/lib/mood/moods'
 import './globals.css'
+import { SmoothScroll } from '@/components/motion/smooth-scroll'
+import { ScrollReset } from '@/components/motion/scroll-reset'
+import { PerfOverlay } from '@/components/motion/perf-overlay'
 
 const interTight = Inter_Tight({ subsets: ['latin'], variable: '--font-inter-tight', display: 'swap' })
 const instrument = Instrument_Serif({ subsets: ['latin'], weight: '400', style: ['normal', 'italic'], variable: '--font-instrument', display: 'swap' })
@@ -60,9 +63,12 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const accentCss = moodStyleSheet(accents)
 
   return (
-    <html lang="en" data-mood={mood} className={`${interTight.variable} ${instrument.variable} ${jetbrains.variable}`}>
+    <html lang="en" data-mood={mood} data-display-font={MOODS[mood].fonts.display} data-body-font={MOODS[mood].fonts.body} className={`${interTight.variable} ${instrument.variable} ${jetbrains.variable}`}>
       <body className="antialiased">
         {accentCss ? <style>{accentCss}</style> : null}
+        <SmoothScroll />
+        <ScrollReset />
+        <PerfOverlay />
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>

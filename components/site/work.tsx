@@ -5,6 +5,7 @@ import { Fragment, useRef, useState } from 'react'
 import { useMood } from '@/components/mood/mood-provider'
 import { CmsImage } from '@/components/media/cms-image'
 import { TextSplit } from '@/components/motion/primitives'
+import { TiltCard } from '@/components/motion/phase-two-primitives'
 import { MemeFigure } from '@/components/site/meme-figure'
 import { FULL_MOTION, gsap, ScrollTrigger, useGSAP } from '@/lib/motion/gsap'
 import { cn } from '@/lib/utils'
@@ -77,7 +78,7 @@ function SequenceScene({ project, index, total }: { project: Project; index: num
         const desktop = ctx.conditions.desktop
         const tl = gsap.timeline({
           defaults: { ease: 'none' },
-          scrollTrigger: { trigger: ref.current, start: 'top top', end: '+=160%', pin: true, scrub: config.motion.scrub },
+          scrollTrigger: { trigger: ref.current, start: 'top top', end: '+=160%', pin: true, scrub: config.motion.scrub, invalidateOnRefresh: true, immediateRender: false },
         })
         tl.fromTo(
           '[data-cover]',
@@ -99,7 +100,9 @@ function SequenceScene({ project, index, total }: { project: Project; index: num
       {project.coverImage ? (
         <div data-cover className="absolute inset-0 will-change-[clip-path]">
           <div data-cover-img className="h-full w-full will-change-transform">
-            <CmsImage media={project.coverImage} alt={project.coverImage.alt || project.title} sizes="100vw" />
+            <TiltCard className="h-full w-full">
+              <CmsImage media={project.coverImage} alt={project.coverImage.alt || project.title} sizes="100vw" />
+            </TiltCard>
           </div>
           <div className="absolute inset-0 bg-background/35" aria-hidden="true" />
         </div>
@@ -172,7 +175,7 @@ function IndexStrategy({ projects, interlude }: { projects: Project[]; interlude
         if (!ctx.conditions?.motion) return
         const rows = gsap.utils.toArray<HTMLElement>('[data-row]')
         rows.forEach((row, i) => {
-          ScrollTrigger.create({ trigger: row, start: 'top 55%', end: 'bottom 55%', onToggle: (s) => s.isActive && setActive(i) })
+          ScrollTrigger.create({ trigger: row, start: 'top 55%', end: 'bottom 55%', invalidateOnRefresh: true, onToggle: (s) => s.isActive && setActive(i) })
         })
       })
       return () => mm.revert()
@@ -208,9 +211,11 @@ function IndexStrategy({ projects, interlude }: { projects: Project[]; interlude
                 {p.category ? <span>{p.category}</span> : null}
               </span>
               {p.coverImage ? (
-                <span className="col-span-2 mt-2 block aspect-[4/3] overflow-hidden lg:hidden">
-                  <CmsImage media={p.coverImage} alt={p.coverImage.alt || p.title} sizes="(min-width:768px) 90vw, 100vw" aspect="4:3" />
-                </span>
+                <div className="col-span-2 mt-2 block aspect-[4/3] overflow-hidden lg:hidden">
+                  <TiltCard className="h-full w-full">
+                    <CmsImage media={p.coverImage} alt={p.coverImage.alt || p.title} sizes="(min-width:768px) 90vw, 100vw" aspect="4:3" />
+                  </TiltCard>
+                </div>
               ) : null}
             </Link>
           </li>
@@ -234,7 +239,9 @@ function IndexStrategy({ projects, interlude }: { projects: Project[]; interlude
                 )}
                 aria-hidden={active !== i}
               >
-                <CmsImage media={p.coverImage} alt="" sizes="34vw" aspect="4:5" />
+                <TiltCard className="absolute inset-0">
+                  <CmsImage media={p.coverImage} alt="" sizes="34vw" aspect="4:5" />
+                </TiltCard>
               </div>
             ) : null,
           )}
@@ -268,11 +275,11 @@ function CollageStrategy({ projects, interlude }: { projects: Project[]; interlu
           gsap.fromTo(
             img,
             { rotate: i % 2 ? 8 : -8, scale: 0.85 },
-            { rotate: i % 2 ? -3 : 3, scale: 1, ease: 'none', scrollTrigger: { trigger: img, containerAnimation: move, start: 'left right', end: 'center center', scrub: true } },
+            { rotate: i % 2 ? -3 : 3, scale: 1, ease: 'none', scrollTrigger: { trigger: img, containerAnimation: move, start: 'left right', end: 'center center', scrub: 0.8, invalidateOnRefresh: true, immediateRender: false } },
           )
         })
         gsap.utils.toArray<HTMLElement>('[data-panel-title]').forEach((t) => {
-          gsap.fromTo(t, { xPercent: 30 }, { xPercent: -10, ease: 'none', scrollTrigger: { trigger: t, containerAnimation: move, start: 'left right', end: 'right left', scrub: true } })
+          gsap.fromTo(t, { xPercent: 30 }, { xPercent: -10, ease: 'none', scrollTrigger: { trigger: t, containerAnimation: move, start: 'left right', end: 'right left', scrub: 0.8, invalidateOnRefresh: true, immediateRender: false } })
         })
       })
     },
@@ -289,9 +296,11 @@ function CollageStrategy({ projects, interlude }: { projects: Project[]; interlu
                 {pad(i + 1)} {p.year ? `· ${p.year}` : ''}
               </span>
               {p.coverImage ? (
-                <span data-panel-img className={cn('mood-frame relative block aspect-[4/3] w-[86%] overflow-hidden border-2 border-foreground md:w-[78%]', i % 2 ? 'ml-auto rotate-2' : '-rotate-2')}>
-                  <CmsImage media={p.coverImage} alt={p.coverImage.alt || p.title} sizes="(min-width:768px) 50vw, 86vw" aspect="4:3" />
-                </span>
+                <div data-panel-img className={cn('mood-frame relative block aspect-[4/3] w-[86%] overflow-hidden border-2 border-foreground md:w-[78%]', i % 2 ? 'ml-auto rotate-2' : '-rotate-2')}>
+                  <TiltCard className="absolute inset-0">
+                    <CmsImage media={p.coverImage} alt={p.coverImage.alt || p.title} sizes="(min-width:768px) 50vw, 86vw" aspect="4:3" />
+                  </TiltCard>
+                </div>
               ) : (
                 <span className="mood-frame block aspect-[4/3] w-[86%] border-2 border-dashed border-foreground/60 md:w-[78%]" aria-hidden="true" />
               )}

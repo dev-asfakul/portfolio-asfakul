@@ -1,6 +1,6 @@
 import type { SceneId } from '../scenes'
 
-type VocabularyProps = { scene: SceneId }
+type VocabularyProps = { scene: SceneId; cursorEnabled?: boolean }
 
 export default function EditorialVocabulary({ scene }: VocabularyProps) {
   return (

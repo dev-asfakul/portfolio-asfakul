@@ -9,7 +9,10 @@ import { FULL_MOTION, gsap, useGSAP } from '@/lib/motion/gsap'
 import { cn } from '@/lib/utils'
 import type { CharacterMoment, Meme, Skill } from '@/lib/cms/types'
 
-const VERBS = ['design', 'understand', 'build']
+export const VERBS = ['design', 'understand', 'build']
+export function verbOffset(index: number, count: number) {
+  return -100 * (index / count)
+}
 
 function VerbSwap() {
   const ref = useRef<HTMLDivElement>(null)
@@ -17,17 +20,19 @@ function VerbSwap() {
 
   useGSAP(
     () => {
-      gsap.matchMedia().add({ desktop: '(min-width: 768px)', motion: FULL_MOTION }, (ctx) => {
+      const mm = gsap.matchMedia()
+      mm.add({ desktop: '(min-width: 768px)', motion: FULL_MOTION }, (ctx) => {
         if (!ctx.conditions?.desktop || !ctx.conditions.motion) return
         gsap
           .timeline({
             defaults: { ease: 'power2.inOut' },
-            scrollTrigger: { trigger: ref.current, start: 'top top', end: '+=140%', pin: true, scrub: config.motion.scrub },
+            scrollTrigger: { trigger: ref.current, start: 'top top', end: '+=140%', pin: true, scrub: config.motion.scrub, invalidateOnRefresh: true, immediateRender: false },
           })
-          .to('[data-verbs]', { yPercent: -100 / VERBS.length, duration: 1 })
-          .to('[data-verbs]', { yPercent: (-100 / VERBS.length) * 2, duration: 1 }, '+=0.3')
+          .to('[data-verbs]', { yPercent: verbOffset(1, VERBS.length), duration: 1 })
+          .to('[data-verbs]', { yPercent: verbOffset(2, VERBS.length), duration: 1 }, '+=0.3')
           .to('[data-verb-it]', { color: 'var(--accent)', duration: 0.4 })
       })
+      return () => mm.revert()
     },
     { scope: ref },
   )

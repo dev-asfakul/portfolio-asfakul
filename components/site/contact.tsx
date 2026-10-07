@@ -5,6 +5,7 @@ import { submitContact, type ContactState } from '@/app/actions/contact'
 import { useMood } from '@/components/mood/mood-provider'
 import { Glyph } from '@/components/motion/glyph'
 import { TextSplit } from '@/components/motion/primitives'
+import { TiltCard } from '@/components/motion/phase-two-primitives'
 import { MemeFigure } from '@/components/site/meme-figure'
 import { cn } from '@/lib/utils'
 import type { CharacterMoment, Meme } from '@/lib/cms/types'
@@ -32,8 +33,8 @@ function Field({
     name,
     required: true,
     autoComplete,
-    'aria-invalid': error ? true : undefined,
-    'aria-describedby': error ? `${id}-error` : undefined,
+    'aria-invalid': error?.length ? true : undefined,
+    'aria-describedby': error?.length ? `${id}-error` : undefined,
     className:
       'w-full border-0 border-b border-line bg-transparent py-3 text-lg text-foreground outline-none transition-colors placeholder:text-muted-foreground/60 focus:border-foreground md:text-xl',
   }
@@ -104,18 +105,20 @@ export function Contact({ email, meme, glyph }: { email?: string; meme?: Meme; g
             </div>
           ) : !open ? (
             <div className="flex flex-col gap-6 border-t border-line pt-8">
-              <button
-                type="button"
-                onClick={() => setOpen(true)}
-                className="group flex w-full items-center justify-between text-left"
-                aria-expanded={open}
-                aria-controls="contact-form"
-              >
-                <span className="heading text-[clamp(2.25rem,6vw,5rem)]">Let&apos;s talk</span>
-                <span className="glyph-box text-[clamp(2rem,5vw,4rem)] transition-transform duration-500 group-hover:translate-x-3" aria-hidden="true">
-                  →
-                </span>
-              </button>
+              <TiltCard className="w-full">
+                <button
+                  type="button"
+                  onClick={() => setOpen(true)}
+                  className="group flex w-full items-center justify-between text-left"
+                  aria-expanded={open}
+                  aria-controls="contact-form"
+                >
+                  <span className="heading text-[clamp(2.25rem,6vw,5rem)]">Let&apos;s talk</span>
+                  <span className="glyph-box text-[clamp(2rem,5vw,4rem)] transition-transform duration-500 group-hover:translate-x-3" aria-hidden="true">
+                    →
+                  </span>
+                </button>
+              </TiltCard>
               {email ? (
                 <p className="meta text-muted-foreground">
                   Or write directly —{' '}
@@ -165,16 +168,18 @@ export function Contact({ email, meme, glyph }: { email?: string; meme?: Meme; g
                 ) : (
                   <span className="meta text-muted-foreground">Replies within two working days.</span>
                 )}
-                <button
-                  type="submit"
-                  disabled={pending}
-                  className={cn(
-                    'meta inline-flex items-center gap-3 bg-foreground px-6 py-4 text-background transition-opacity disabled:opacity-50',
-                    config.id === 'play' && 'rounded-full bg-accent text-accent-foreground',
-                  )}
-                >
-                  {pending ? 'Sending…' : 'Send message'} <span aria-hidden="true">→</span>
-                </button>
+                <TiltCard className="shrink-0">
+                  <button
+                    type="submit"
+                    disabled={pending}
+                    className={cn(
+                      'meta inline-flex items-center gap-3 bg-foreground px-6 py-4 text-background transition-opacity disabled:opacity-50',
+                      config.id === 'play' && 'rounded-full bg-accent text-accent-foreground',
+                    )}
+                  >
+                    {pending ? 'Sending…' : 'Send message'} <span aria-hidden="true">→</span>
+                  </button>
+                </TiltCard>
               </div>
             </form>
           )}

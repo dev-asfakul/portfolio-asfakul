@@ -1,9 +1,9 @@
 'use client'
 
 import { useMood } from '@/components/mood/mood-provider'
+import { Arrival } from '@/components/site/arrival'
 import { Capabilities } from '@/components/site/capabilities'
 import { Contact } from '@/components/site/contact'
-import { Footer } from '@/components/site/footer'
 import { Hero } from '@/components/site/hero'
 import { Pause } from '@/components/site/pause'
 import { Reviews } from '@/components/site/reviews'
@@ -30,6 +30,7 @@ export function Experience({ content }: { content: SiteContent }) {
     <div key={mood} className={`mood-stage mood-stage-${mood}`} data-mood-stage={mood} data-scroll-mode={mood === 'play' ? 'spatial' : mood === 'quiet' ? 'stillness' : 'longform'}>
       <div className="mood-stage__background" aria-hidden="true" />
       <div className="mood-stage__grain" aria-hidden="true" />
+      <Arrival about={content.about} />
       <Hero identity={identity} about={content.about} glyph={pickCharacter(characters, 'hero', mood)} />
       <Statement about={content.about} identity={identity} socials={content.socials} glyph={pickCharacter(characters, 'statement', mood)} />
       {showPause ? <Pause meme={pauseMeme} glyph={pauseGlyph} /> : null}
@@ -37,7 +38,6 @@ export function Experience({ content }: { content: SiteContent }) {
       <Capabilities skills={content.skills} meme={pickMeme(memes, 'capabilities', mood)} glyph={pickCharacter(characters, 'capabilities', mood)} />
       <Reviews reviews={content.reviews} />
       <Contact email={content.about.email} meme={pickMeme(memes, 'contact', mood)} glyph={pickCharacter(characters, 'contact', mood)} />
-      <Footer identity={identity} about={content.about} socials={content.socials} note={content.settings.footerNote} settings={content.settings} />
     </div>
   )
 }

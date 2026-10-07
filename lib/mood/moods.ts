@@ -4,6 +4,9 @@ export type ProjectStrategy = 'index' | 'sequence' | 'collage'
 export type ReviewStrategy = 'list' | 'spotlight' | 'stack'
 export type CapabilityStrategy = 'ledger' | 'split' | 'scatter'
 export type HeroStrategy = 'still' | 'split' | 'stack'
+export type MoodNav = 'minimal' | 'bar' | 'pill'
+export type MoodCursor = 'dot' | 'crosshair' | 'blob'
+export type MoodTransition = 'wipe' | 'fade' | 'bounce'
 
 export interface MotionPreset {
   ease: string
@@ -35,6 +38,14 @@ export interface MoodConfig {
     reviews: ReviewStrategy
     capabilities: CapabilityStrategy
   }
+  fonts: { display: 'serif' | 'grotesk' | 'oversized'; body: 'sans' | 'serif' | 'mono' }
+  nav: MoodNav
+  cursor: MoodCursor
+  heroVariant: HeroStrategy
+  workVariant: ProjectStrategy
+  aboutVariant: 'column' | 'two-up' | 'collage'
+  contactVariant: 'inline' | 'form' | 'big-type'
+  transition: MoodTransition
   grid: 'hidden' | 'visible' | 'animated'
   imageTreatment: 'soft' | 'framed' | 'cutout'
   memes: 'restrained' | 'integrated' | 'loud'
@@ -58,6 +69,8 @@ export const MOODS: Record<MoodId, MoodConfig> = {
       surface: '#E9E6DF',
     },
     layout: { hero: 'still', projects: 'index', reviews: 'list', capabilities: 'ledger' },
+    fonts: { display: 'serif', body: 'sans' },
+    nav: 'minimal', cursor: 'dot', heroVariant: 'still', workVariant: 'index', aboutVariant: 'column', contactVariant: 'inline', transition: 'wipe',
     grid: 'hidden',
     imageTreatment: 'soft',
     memes: 'restrained',
@@ -79,6 +92,8 @@ export const MOODS: Record<MoodId, MoodConfig> = {
       surface: '#171714',
     },
     layout: { hero: 'split', projects: 'sequence', reviews: 'spotlight', capabilities: 'split' },
+    fonts: { display: 'grotesk', body: 'serif' },
+    nav: 'bar', cursor: 'crosshair', heroVariant: 'split', workVariant: 'sequence', aboutVariant: 'two-up', contactVariant: 'form', transition: 'fade',
     grid: 'visible',
     imageTreatment: 'framed',
     memes: 'integrated',
@@ -100,6 +115,8 @@ export const MOODS: Record<MoodId, MoodConfig> = {
       surface: '#1B27D9',
     },
     layout: { hero: 'stack', projects: 'collage', reviews: 'stack', capabilities: 'scatter' },
+    fonts: { display: 'oversized', body: 'mono' },
+    nav: 'pill', cursor: 'blob', heroVariant: 'stack', workVariant: 'collage', aboutVariant: 'collage', contactVariant: 'big-type', transition: 'bounce',
     grid: 'animated',
     imageTreatment: 'cutout',
     memes: 'loud',

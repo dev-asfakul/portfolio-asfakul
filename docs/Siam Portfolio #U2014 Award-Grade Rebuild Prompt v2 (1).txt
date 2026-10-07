@@ -1,0 +1,283 @@
+﻿Siam Portfolio — Award-Grade Rebuild Prompt 
+
+
+0. MISSION
+You are a senior creative developer. Turn ASFAKUL SIAM — Digital Design House into a site worthy of Awwwards / FWA / CSSDA "Site of the Day".
+Concept: One Identity. Multiple Moods. One CMS content model, three genuinely different designs (Quiet, Editorial, Play).
+What is wrong today (the owner's words + audit):
+1. Sections do not state their objective. A visitor cannot tell what this portfolio is, who it is for, or what to do next.
+2. No connection between home sections and the pages /work, /about, /reviews, /contact. Header/footer are not a true shell.
+3. Design work is not showcased clearly: no process, role, outcome or depth per project.
+4. Animation feels like flat, old CSS transitions. GSAP is installed but barely used: no smooth scroll, no SplitText, no Flip, no batch, no 3D, no velocity effects, no shared-element transitions. Reverse/refresh is unreliable and scroll feels too fast.
+5. Moods differ in colour and some layouts but share one font set, one nav, and inner pages ignore the mood.
+6. Small screens are laggy and buggy.
+Definition of done: a stranger understands who Siam is, what he makes, and sees proof in 5 seconds; every section answers why am I here / where next; every interaction has weight and feedback; it holds 60fps on mid-range phones; each mood is recognisable at a glance with the text blurred.
+1. WORKING RULES (non-negotiable)
+1. Read before writing. Open every file in app/, components/, lib/, docs/. Report what you read.
+2. No invented content. All copy, projects, stats, socials, process steps live in MongoDB via the admin CMS. Missing data → add schema field + admin input + graceful empty state. Placeholder copy may exist only as admin-editable defaults clearly marked.
+3. Phase gate. Each phase ends with pnpm typecheck && pnpm lint && pnpm test && pnpm build. Do not start the next phase until all pass. Keep the 37 existing tests; add tests for new logic.
+4. No interleaving. Finish a phase, report, then continue.
+5. Evidence. Per UI change save /tmp/agent-browser/<phase>-<route>-<mood>-mobile.png (375w) and ...-desktop.png (1440w). Record a short screen capture of every signature animation. Re-test /admin login after every phase.
+6. ADRs. Add docs/decisions/00NN-*.md for every structural decision. Keep docs/AGENT.md and AGENTS.md consistent.
+7. Report format (end of every phase): Changed · Bugs closed · Gates · Screenshots · Metrics before→after · Not verified · Remaining · Next. Say plainly what you could not verify (real-device perf, etc.).
+8. Use versions pinned in package.json (Next 16.3.3, React 19, GSAP 3.15). Read node_modules/next/dist/docs/ before using Next APIs (AGENTS.md requires it).
+2. VERIFIED REPO FACTS (treat as ground truth, re-confirm in Phase 0)
+* Routes: /, /work, /work/[slug], /about, /reviews, /contact, /design (dev reference), /admin/*. No /all-work, no (shell) group.
+* app/(site)/layout.tsx renders skip link, grid overlay, SiteNav, <main id="main"> — no footer. Footer is rendered inside experience.tsx (home) and public-sections.tsx (/about) only. AboutSections nests a second <main>.
+* app/page.tsx wraps SiteLayout+HomePage while app/(site)/page.tsx also exists → duplicate / page; verify and remove app/page.tsx.
+* Header is fixed, mix-blend-difference, no --header-h; hero uses pt-16.
+* Mood engine exists in lib/mood/moods.ts (tokens, layout strategies, motion presets, grid, imageTreatment, memes). Experience remounts per mood. Inner pages are mood-agnostic. One font set for all moods (Inter Tight, Instrument Serif, JetBrains Mono).
+* GSAP: lib/motion/gsap.ts registers only ScrollTrigger + useGSAP. 43 ScrollTrigger refs in 11 files. No Lenis, no immediateRender, no batch. FULL_MOTION has no width check; no HOVER query.
+* Socials: social_links collection exists; footer + statement render it; /about does not; no header socials; no icons.
+* next.config.mjs has images.unoptimized: true. No sitemap, robots, loading.tsx, OG route, pino.
+* Data bugs: insertDocument order race; indexes.ts indexes socials/characters but code reads social_links/character_moments; rate-limit windowStart is a number (login) and a Date (contact) and has no TTL; every admin action returns raw error.message; requireAdmin throws plain Error('Unauthorized'); auth.ts reads process.env directly; jwt callback hits the DB every request; contact action trusts x-forwarded-for; VerbSwap hardcodes -100 / VERBS.length; min-h-screen/100vh remain in login/admin/design.
+* Already fine (do not rework): contact form has Zod + honeypot + idempotency + IP rate limit; React cache() is per-request; play mood defines --radius: 999px; email retry already has jitter (make it proportional only).
+* SIAM_BUILD_INSTRUCTIONS.md is not in the repo. Create docs/design/BRIEF.md from this prompt and treat it as the spec.
+3. CREATIVE DIRECTION
+3.1 Narrative architecture (the "clarity" fix)
+Home is a guided tour, not a pile of scenes. Every section has: number + eyebrow, a one-line objective ("what you'll get here"), the content, and a "View all →" link to its page. Order:
+#
+	Section
+	Objective line (CMS-editable)
+	Links to
+	01
+	Hero
+	Who I am, what I make, for whom. Two CTAs: See work, Start a project
+	/work, /contact
+	02
+	Proof strip
+	Credibility in one glance (roles, years, selected clients, stats) — hidden if empty
+	/about
+	03
+	Selected work
+	The best 3–5 case studies as scroll-driven visual stories
+	/work, /work/[slug]
+	04
+	Capabilities / Process
+	How design and engineering meet; how a project runs
+	/about
+	05
+	About teaser
+	The person behind the work
+	/about
+	06
+	Kind words
+	Social proof
+	/reviews
+	07
+	Contact
+	What happens after you write; response time; availability
+	/contact
+	Every inner page has: breadcrumb, page objective line, a "Next up →" strip to the logical next page, and the shared footer. Footer = nav, socials with icons, availability, mood name, back to top.
+3.2 Portfolio clarity
+* Hero states role and offer in plain words, then the art direction. Never only a poetic line.
+* Work index shows discipline filters (Design / Development / Both) using GSAP Flip for animated re-layout.
+* Each case study (see Phase 4) answers: What was the problem? What did I do? How? What changed? with role, year, stack, links, gallery, process steps, outcomes, next project.
+* Design system proof: a "How this site is built" block (tokens, moods, motion rules) linking to /design as a read-only public page or a case study.
+3.3 Three moods = three designs
+
+
+	Quiet
+	Editorial
+	Play
+	Feel
+	Gallery, calm, air
+	Magazine, confident, structured
+	Loud, kinetic, brutalist-joyful
+	Palette
+	#F2F0EB / #1A1917 / #B2532E
+	#0E0E0C / #ECE8DF / #FF4A1C
+	#2230FF / #F6F4EE / #E4FF3A
+	Type
+	refined serif display + quiet sans
+	grotesk display + serif italic accents
+	oversized display + mono
+	Grid
+	single column, huge margins
+	visible 12-col hairlines
+	broken, overlapping, animated
+	Hero
+	still, centered, slow reveal
+	split, big headline + meta rail
+	stacked brutal type, pointer-reactive
+	Work
+	index list with hover preview image
+	chaptered full-bleed sequence
+	collage + horizontal run
+	3D signature
+	soft shader / paper-fold plane
+	image-plane distortion + depth cards
+	physics-ish 3D shapes/stickers
+	Cursor
+	subtle dot
+	crosshair + label
+	blob / emoji
+	Nav
+	minimal text
+	bar with index
+	pill, bouncy
+	Motion
+	long soft eases, low intensity
+	precise masks, line draws, expo
+	springy overshoot, parallax, velocity skew
+	Same content, different layout, type, grid, image treatment, cursor, nav, motion language, and inner pages. If two moods look alike with text blurred, the work is not done.
+3.4 Motion & dimensionality language
+The owner asked for "3D / 5D". There is no real 5D in a browser. Treat it as five axes of experience and design each deliberately:
+1. X/Y — layout, masks, reveals.
+2. Z (3D) — real depth: CSS 3D (perspective, rotateX/Y, translateZ) for cards/tilt, and one WebGL/Three.js moment per mood.
+3. Time — scroll-scrubbed timelines, pinned sequences, scroll velocity.
+4. Input — pointer position, magnetic hover, drag, keyboard, device tilt on mobile (opt-in).
+5. State/Context — mood, route, reduced-motion, device capability.
+Every animation must answer what does this communicate? No decoration for its own sake.
+4. MOTION ENGINEERING SPEC
+GSAP must be used as a system, not sprinkled. GSAP 3.13+ ships the former Club plugins free; confirm in node_modules/gsap and register in lib/motion/gsap.ts: ScrollTrigger, SplitText, Flip, Observer, CustomEase, DrawSVGPlugin, MorphSVGPlugin, MotionPathPlugin, ScrollToPlugin.
+* Smooth scroll: Lenis, one instance, driven by gsap.ticker.add((t) => lenis.raf(t * 1000)), gsap.ticker.lagSmoothing(0), lenis.on('scroll', ScrollTrigger.update). Feel: heavy and calm (lerp ≈ 0.08–0.1, wheel multiplier ≤ 1). Off for reduced motion; evaluate on touch devices and enable only if profiling proves smooth. Record the decision in an ADR.
+* Tokens: lib/motion/tokens.ts — durations (0.18 / 0.35 / 0.7 / 1.1 s), staggers, and custom eases via CustomEase (siamOut, siamInOut, siamSpring). Moods override through MOODS[mood].motion.
+* Media queries: FULL_MOTION = '(min-width: 768px) and (prefers-reduced-motion: no-preference)', HOVER = '(hover: hover) and (pointer: fine)', REDUCED. Use gsap.matchMedia() everywhere; no ad-hoc innerWidth.
+* Performance: animate only transform/opacity (and clip-path where profiled cheap); will-change only while animating; one ticker; kill/disable WebGL when off-screen or tab hidden; clamp WebGL DPR to 1.5; dynamic-import 3D code; cap active ScrollTriggers (target < 15 on mobile); use ScrollTrigger.batch for repeated items; quickTo for pointer follow.
+* Reversibility: every from/fromTo gets immediateRender: false where needed; timelines tied to scroll use scrub (0.6–1.2) or toggleActions: 'play none none reverse'; invalidateOnRefresh: true; everything lives in useGSAP({ scope }) so unmount reverts. Test: scroll up, route back, resize, orientation change, hard refresh mid-page.
+* Primitives to build in components/motion/ (reusable, mood-aware): SplitReveal (masked lines/words via SplitText), MaskImage (clip-path reveal + inner parallax), Magnetic, TiltCard (3D, quickTo), VelocitySkew (skew/stretch from scroll velocity), Marquee (velocity-reactive), PinnedSequence, HorizontalRail (containerAnimation), FlipGrid, DrawLine (DrawSVG), Counter, Cursor, Preloader, PageTransition, SectionProgress.
+* 3D: three + @react-three/fiber (+ drei only if needed), lazy-loaded, desktop and capable-device only (navigator.hardwareConcurrency >= 6 and deviceMemory >= 4 or a quick fps probe), with a designed static/CSS-3D fallback. Pause on visibilitychange and when out of view. Budget: first-load JS unchanged for non-3D routes; 3D chunk < 180 kB gz.
+5. PHASES (execute in order)
+PHASE 0 — Audit & baseline (no feature work)
+0.1 Read the full repo; output a repo map (routes, components, lib, collections, tests). 0.2 Run the four gates untouched; record baseline (test count, bundle sizes, Lighthouse mobile+desktop for /, /about, /work, one /work/[slug], CLS/LCP/INP, active ScrollTrigger count per route). 0.3 Confirm or refute every item in §2 with file:line. Add anything new you find. 0.4 Write docs/design/BRIEF.md (this prompt's creative sections) and ADR-0007 recording the baseline. Exit: gates run, verdict table delivered.
+PHASE 1 — Shell & information architecture
+1.1 Delete app/page.tsx (duplicate /). Keep app/(site)/page.tsx. 1.2 Make app/(site)/layout.tsx the single shell: SkipLink, SiteNav, <main id="main" style="padding-top: var(--header-h)">, Footer. Remove Footer from experience.tsx and public-sections.tsx; remove the nested <main> in AboutSections. Hero handles its own full-bleed offset via margin-top: calc(var(--header-h) * -1) if it must sit under the header. 1.3 Tokens: --header-h: 64px (≥768px: 80px); scroll-margin-top: var(--header-h) for anchors. 1.4 Header: logo, links (Work, About, Reviews, Contact), socials (icon-only desktop), mood switcher, menu on mobile. Active-route indicator. Header must never remount between routes. 1.5 Add SectionHeading (number, eyebrow, objective line, "View all →") to every home section per §3.1; add PageHeader with Breadcrumb (+ BreadcrumbList JSON-LD) and a NextUp strip to /work, /work/[slug], /about, /reviews, /contact. 1.6 /design becomes noindex and is linked only from the footer "Design system" if kept public. 1.7 CMS: add editable objective text per section in settings (with defaults), plus availability/response-time fields for contact. Verify: every route × every mood: header and footer present once, content never overlapped, 404/error also inherit shell, keyboard order correct. ADR: shell architecture.
+PHASE 2 — Motion engine (the foundation)
+2.1 Install and register the GSAP plugins in §4. Create lib/motion/tokens.ts and extend lib/motion/gsap.ts with FULL_MOTION, HOVER, REDUCED. 2.2 Install Lenis; build components/motion/smooth-scroll.tsx (mounted once in root layout) with the ticker wiring from §4. Add scroll-reset.tsx (route change → scroll top + ScrollTrigger.refresh()); handle back/forward restoration deliberately. 2.3 Build the primitives list from §4 with Storybook-style demos on /design (so each can be reviewed in all three moods). 2.4 Refactor every existing gsap.from/fromTo/ScrollTrigger (11 files) onto the primitives/tokens: add immediateRender: false, invalidateOnRefresh, viewport-relative start/end, cleanup via useGSAP. Replace per-item triggers with ScrollTrigger.batch. 2.5 Fix VerbSwap: derive step from VERBS.length and index; add a unit test with 2, 3 and 5 verbs. 2.6 Replace ScrollPercent's raw scroll listener with ScrollTrigger/Lenis progress. 2.7 Add a dev-only FPS/trigger-count overlay (?perf=1). 2.8 Reverse/restart matrix (documented pass/fail): scroll up, route back, resize, orientation change, hard refresh mid-page — on desktop and mobile. Acceptance: scroll feels weighty and smooth, no jumps, no stuck states; all animations reverse. ADR: motion system.
+PHASE 3 — Showcase & storytelling (home + inner pages)
+3.1 Hero: plain-language role/offer from CMS (about.headline, about.role, about.availability), two CTAs, scroll cue. SplitReveal entrance, mood-specific. 3.2 Proof strip: CMS-driven stats/clients; hidden when empty. 3.3 Selected work: scroll-driven visual case-study teasers (not a card grid): pinned media, MaskImage reveals, project number/title/role/year, hover preview, link to /work/[slug]; section footer links to /work. 3.4 Capabilities/Process: CMS-driven process steps with DrawLine connector and pinned sequence on desktop. 3.5 About teaser, Kind words, Contact: each with objective line and "View all →" to its page. Contact shows availability and response time. 3.6 /work: filterable index (FlipGrid), per-mood layout (list / chapters / collage). 3.7 /work/[slug] case study: schema fields role, year, timeline, stack[], problem, process[] (title, body, image), outcomes[], links[], gallery[], video?, next. Scroll-driven layout, sticky metadata rail, image mask reveals, shared-element transition from the list card (Flip). Empty fields hide their blocks. Admin gets inputs for all fields. 3.8 /about: story, principles, experience timeline (DrawLine), "Find me" socials block, resume link. /reviews and /contact get the same page-header pattern. 3.9 Memes/characters (Mr. Bean "wait for it" before work, Roll Safe near contact) stay CMS-driven and timed as comedic beats; never block content; off under reduced motion. Acceptance: with all copy hidden you can still tell what each section is for from structure alone; each section links forward.
+PHASE 4 — Three moods = three designs
+4.1 Extend lib/mood/moods.ts (do not create a parallel config): add fonts, nav, cursor, heroVariant, workVariant, aboutVariant, contactVariant, transition. 4.2 Load per-mood fonts via next/font with size-adjust fallbacks so there is no layout shift; only the active mood's display font blocks render. 4.3 Build variants: HeroStill/HeroSplit/HeroStack, WorkIndex/WorkSequence/WorkCollage, AboutColumn/AboutTwoUp/AboutCollage, ContactInline/ContactForm/ContactBigType. Apply to the home and the inner pages. 4.4 Mood-specific nav and cursor (see §3.3). Cursor only on HOVER devices; never hide the native cursor on touch. 4.5 Mood switch transition: authored (clip-path wipe in the incoming accent colour with content cross-fade), persisted via the existing siam-mood cookie (already SSR-read, so no flash), keyboard accessible, aria-live announcement, MorphSVG toggle icon. 4.6 Contact sheet: every section × every mood × mobile/desktop. If two moods look alike, the phase fails.
+PHASE 5 — 3D & signature moments
+5.1 One signature moment per mood, each reversible, performant, with a fallback:
+* Quiet: soft shader-gradient / paper-fold plane that reacts slowly to scroll and pointer.
+* Editorial: WebGL image plane with displacement on hover and scroll-velocity distortion for project images; CSS-3D depth cards in the case study.
+* Play: pointer-reactive 3D shapes/stickers (reuse lib/visuals/shapes) with spring physics and a drop-in on load. 5.2 Shared Stage3D wrapper: lazy import, capability probe, DPR clamp, pause off-screen/hidden tab, dispose on unmount, no layout shift (reserved aspect ratio), poster fallback for low-end/touch/reduced motion. 5.3 TiltCard (CSS 3D + quickTo) on cards and CTAs in all moods, intensity from MOODS[mood].motion.intensity. 5.4 Optional mobile device-tilt parallax behind an explicit permission button; off by default. Acceptance: sustained 60fps on a mid-range laptop; no frame over 25ms during scroll; chunk budget met.
+PHASE 6 — Micro-interactions & transitions
+6.1 Hover/press/focus states on every interactive element: link underline draw, arrow shift, card lift/tilt, magnetic CTAs (Magnetic), nav accent reveal, visible focus-visible per mood. 6.2 Text: SplitReveal on headings and eyebrows; letter-spacing/weight shifts on hover where the font supports it; counters. 6.3 Scroll feel: VelocitySkew on marquees and images (clamped), section progress indicator, scroll-linked colour/background shifts between sections. 6.4 Page transitions: View Transitions API where supported with a GSAP fallback; header/footer persist; shared-element transition card → case study; no scroll jump. 6.5 Preloader/intro: shown once per session, skippable, tied to real asset readiness, ≤ 1.5s, none for reduced motion. 6.6 Loading, empty, error states designed per mood (replace generic text).
+PHASE 7 — Mobile: a designed experience, not a stripped one
+7.1 Replace remaining min-h-screen/100vh (login, admin, design, globals) with 100dvh/svh. Add html{-webkit-text-size-adjust:100%}, body{overscroll-behavior-y:none}, safe-area insets, 44px tap targets. 7.2 Mobile motion set: light masked reveals, tap feedback, momentum horizontal rails, no pinned multi-step timelines, no heavy scrub, no WebGL (poster or CSS-3D tilt only). Gate with FULL_MOTION/capability probe. 7.3 Cut active ScrollTriggers (batch, lazy-create near viewport, kill off-screen); report counts before/after. 7.4 Images: decide images.unoptimized (Cloudinary transforms with f_auto,q_auto and responsive srcset/sizes, or re-enable Next optimization); priority on LCP only; reserved aspect ratios. 7.5 Test 320/375/390/768/1024/1440 with 6× CPU throttle + Fast 3G. Targets: LCP < 2.5s, CLS < 0.05, INP < 200ms. Mark real-device results "not verified" unless tested on hardware. 7.6 Re-run the reverse/restart matrix on mobile including orientation change.
+PHASE 8 — Data, security & CRUD hardening
+8.1 Order race: counters collection + findOneAndUpdate({_id: collection}, {$inc: {seq: 1}}, {upsert: true, returnDocument: 'after'}); seed from current max; concurrency test. 8.2 Index mismatch: point indexes.ts at the real collections (social_links, character_moments, media, etc.); add a test that every collection read in queries.ts has its index. 8.3 TTL: add expiresAt: Date to login and contact rate-limit writes; TTL index with expireAfterSeconds: 0; unify types; migration-safe. 8.4 Errors: replace fail() in all admin actions with a mapper to safe AppError messages; log raw errors server-side only; tests proving Mongo messages never reach the client. 8.5 Auth: requireAdmin() throws typed AppError (UNAUTHORIZED vs DEPENDENCY_UNAVAILABLE when auth env is missing); auth.ts reads validated env; cache revoked-session check (short TTL) instead of a DB read per request; fix logout revocation scope. 8.6 Contact: derive IP safely (platform header / trusted proxy count) instead of trusting raw x-forwarded-for. 8.7 safely() logs stack in development. Make email backoff jitter proportional (base * 2**attempt * (0.5 + Math.random())). 8.8 Security headers (CSP, X-Content-Type-Options, Referrer-Policy, Permissions-Policy) via next.config; allow-list Cloudinary hosts.
+PHASE 9 — Platform & SEO
+9.1 Tag-based revalidation (revalidateTag('projects'|'settings'|'about')) with tagged cached reads, replacing blanket revalidatePath('/', 'layout') where possible. 9.2 Draft mode for unpublished project preview (admin-only enter/exit). 9.3 pino structured logging with request IDs (server only). 9.4 app/sitemap.ts, app/robots.ts, per-route metadata and canonicals; JSON-LD Person, WebSite, CreativeWork; sameAs from CMS socials on every page. 9.5 Dynamic OG images via ImageResponse, styled per mood. 9.6 loading.tsx / error.tsx per route group; generateStaticParams for /work/[slug].
+PHASE 10 — QA & award readiness
+10.1 axe on every route × mood; keyboard-only walkthrough; reduced-motion walkthrough (calm but complete); contrast report per mood. 10.2 Lighthouse (mobile): Performance ≥ 90, Accessibility 100, Best Practices ≥ 95, SEO 100; explain any miss. 10.3 Chrome, Safari (iOS + macOS), Firefox; document fallbacks. 10.4 Remove dead code/deps; zero console errors and hydration warnings. 10.5 Update AGENTS.md, docs/AGENT.md, README: motion system, mood system, how to add a mood/section/primitive. 10.6 Award self-review: score Design, Usability, Creativity, Content, Developer craft (0–10) with evidence and list the 5 weakest areas. Be critical, not flattering.
+6. REPORT FORMAT
+PHASE N — <name>
+Changed:       <files + summary>
+Bugs closed:   <IDs>
+Gates:         typecheck ✓ lint ✓ test ✓ (N tests) build ✓
+Screenshots:   <paths>   Captures: <paths>
+Metrics:       <before → after>
+Not verified:  <honest list>
+Remaining:     <list>
+Next:          PHASE N+1
+Start with Phase 0. Do not summarize this prompt — execute it.
+
+
+7. STORY-FIRST OVERRIDE (highest priority — overrides §3.1 and Phase 3 where they conflict)
+This is not a portfolio. It is a design house told as a story. A visitor lands, scrolls, and without reading paragraphs understands what Siam does, feels the quality, changes their opinion about what a website can be, and decides to hire him. Animation and design are the language; text is only a caption.
+7.1 The belief journey (design every scroll beat for this)
+Curious → Surprised → Understands → Trusts → Wants it → Acts
+Every chapter has one job in that journey. If a chapter does not move the visitor one step along it, cut it.
+7.2 The story in seven acts (one continuous scroll, one visual world)
+Act
+	Emotion goal
+	Visual idea (carried by GSAP, not words)
+	Ends with
+	1. Arrival
+	Curiosity
+	A plain, "default web" moment (system font, grey, flat) that the first scroll transforms into a designed world: type, colour, depth, motion arrive in sequence. The site shows what design does by doing it.
+	Chapter 2 pointer
+	2. The problem
+	Recognition
+	Forgettable websites seen as a fast, bland blur (velocity-skewed marquee of generic layouts), then a hard cut to silence and one idea.
+	Turn
+	3. The turn: one identity, three moods
+	Wonder
+	The same sentence re-dressed live in Quiet, Editorial, Play (typeface, grid, colour, motion swap in front of the visitor, scrubbed by scroll). This is the thesis: same content, three feelings.
+	Proof
+	4. Proof
+	Admiration
+	Selected work as scroll-driven visual stories: pinned media, depth, mask reveals, a 3D moment. Each project reads as a mini-film, not a card.
+	Process
+	5. How it is made
+	Understanding
+	Design → understand → build as one drawn line (DrawSVG) connecting stages; the line becomes a working interface. Shows thinking and engineering together.
+	Trust
+	6. Trust
+	Confidence
+	Kind words, outcomes and numbers entering with weight and calm, not carousels.
+	Invitation
+	7. Invitation
+	Desire + ease
+	"Your story is next." Availability, response time, a low-friction CTA; the world resolves into the contact moment. Memes/characters used as a human beat, never a distraction.
+	Contact / /contact
+	All act copy lives in the CMS as a storyChapters collection (act, title, line, visualKey, linkLabel, linkHref, order). Ship admin-editable defaults clearly marked as draft; do not invent claims, stats or client names.
+7.3 Rules that make the story work
+1. Continuity. One world, not stacked unrelated scenes. Shared elements (a line, a shape, a colour field, a type block) travel between acts via GSAP timelines and Flip.
+2. Understandable without words. Mute test: a visitor reading no text should still say "this person designs and builds beautiful, high-end digital experiences."
+3. Chapter navigation. A slim progress rail with act names (clickable, keyboard accessible, synced with Lenis/ScrollTrigger). A persistent, quiet "Start a project" appears after Act 3 and never blocks content.
+4. Always an exit. Visitors can jump to Work or Contact at any time. Every act ends with a forward pointer and a link to its real page (/work, /about, /reviews, /contact). Inner pages continue the story: /work = evidence, /about = the person, /reviews = trust, /contact = invitation.
+5. Pacing. Desktop: each act 1–1.5 viewports of pinned or scrubbed motion. Mobile: each act ≤ 1.5 screens, reduced to the strongest single idea per act. Total home scroll should feel like a short film, not a long page.
+6. Mood changes the telling, not the plot. Same seven acts in every mood; each mood stages them differently (Quiet = slow and spacious, Editorial = precise and chaptered, Play = kinetic and surprising).
+7. Reduced motion = a still storyboard of the same seven acts with the same order and links (designed, not degraded).
+7.4 New phase: STORY SCRIPT (insert after Phase 2, before Phase 3)
+PHASE 2.5 — Story script & storyboard (no feature code)
+* Write docs/design/STORY.md: for each act and each mood, the one-sentence idea, the visual metaphor, the GSAP technique (pin, scrub, Flip, SplitText, DrawSVG, velocity, 3D), the shared element that carries into the next act, the mobile version, and the reduced-motion version.
+* Produce a storyboard (frames per act per mood) and a rough scroll-timing map (viewport heights per act).
+* Define the CMS fields in §7.2 and the admin forms.
+* Stop and show the owner for approval before building Phase 3.
+Phase 3 then becomes "Build the story": implement acts 1–7 exactly as approved in STORY.md, using the Phase 2 primitives. Hero and sections from §3.1 become acts; §3.1's per-section "View all →" links stay, now as each act's closing pointer.
+7.5 Story acceptance tests (add to every phase report from Phase 3 on)
+* 5-second test: a stranger names what the studio does and what to do next.
+* Mute test: same, reading no text.
+* Blur test: the three moods are distinguishable with all text blurred.
+* Continuity test: screen-record the full scroll; no act feels like a separate template.
+* Mind-change test: show the recording to 5 people unfamiliar with the project; ask "what do you think of this designer, and would you contact him?" Report the answers honestly. Failing results block the phase.
+* Performance test: the full story holds 60fps on a mid-range laptop and a mid-range phone profile; every act reverses cleanly on scroll-up.
+
+
+8. APPROVED DEFAULT STORY COPY (seed into storyChapters)
+The owner approved these lines as the starting copy. Seed them as defaults in the CMS (storyChapters), fully editable in admin. Do not add claims, client names or numbers. Do not rewrite the lines; if a line does not fit a layout, tell the owner instead of changing it.
+Act
+	Line 1
+	Line 2
+	Link / CTA
+	1. Arrival
+	Starts plain: "Hi, I make websites." The first scroll transforms it into: "I design how websites feel."
+	Scroll.
+	pointer to Act 2
+	2. The problem
+	Most websites are seen. Few are remembered.
+	Templates look alike. People forget alike.
+	pointer to Act 3
+	3. The turn
+	One identity. Three moods.
+	Same words: Quiet, Editorial, Play. Watch what changes.
+	pointer to Act 4
+	4. Proof
+	Work that moves.
+	Selected projects, told as short films.
+	See all work → /work
+	5. How it's made
+	I design it. I understand it. I build it.
+	One person, from first sketch to shipped code.
+	About me → /about
+	6. Trust
+	In their words.
+	What clients say after launch.
+	Kind words → /reviews
+	7. Invitation
+	Your story is next.
+	Tell me what you're making. I reply personally.
+	Start a project → /contact
+	Rules for this copy:
+* Act 1 is the one deliberate exception to "no invented styling": the plain-then-designed transformation is the concept. Build both states from the real design tokens (plain = system font, grey, flat; designed = the active mood).
+* Act 5 states that Siam works solo from sketch to shipped code. Keep it editable and flag it in the Phase 2.5 review so the owner can confirm or change it.
+* Act 6 is hidden entirely until real reviews exist in the CMS. Acts 5→7 must still flow when it is hidden.
+* Act 7 shows availability and response time from CMS fields (about.availability, settings.responseTime); if empty, show nothing, not a placeholder.
+* Each act's line 1 is the dominant typographic moment; line 2 is a quiet caption. Words stay few; motion and design carry the meaning.
+* In Phase 2.5, the dev must show each line staged in all three moods (Quiet, Editorial, Play) in the storyboard before building.

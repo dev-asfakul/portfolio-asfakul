@@ -3,7 +3,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { ImageReveal, Parallax, ScrollText, StaggerGroup, TextSplit } from '@/components/motion/primitives'
-import { Footer } from '@/components/site/footer'
 import type { About, SiteSettings, SocialLink } from '@/lib/cms/types'
 import type { Identity } from '@/lib/brand'
 
@@ -41,10 +40,10 @@ export function AboutSections({ about, settings, identity, socials }: { about: A
           <p className="meta">Experience &amp; Roles</p>
           <div className="mt-12 divide-y divide-foreground/15">{(about.experience || []).map((entry, index) => <article className="grid gap-4 py-8 md:grid-cols-[0.3fr_0.7fr]" key={`${entry.company}-${index}`}><p className="meta text-muted-foreground">{entry.period}</p><div><h2 className="text-2xl">{entry.role} <span className="text-muted-foreground">at {entry.company}</span></h2><p className="meta mt-3 text-muted-foreground">{entry.location}</p><p className="mt-5 max-w-xl leading-relaxed text-muted-foreground">{entry.summary}</p></div></article>)}</div>
         </section>
-        <section className="mx-auto max-w-7xl py-24 md:py-36"><div className="flex flex-col items-start justify-between gap-8 md:flex-row md:items-end"><div><p className="meta">Continue</p><h2 className="display mt-4 text-4xl md:text-6xl">Let&apos;s make something useful.</h2></div><div className="flex flex-wrap gap-5">{settings.resumeUrl ? <a className="meta border-b border-foreground pb-2" href={settings.resumeUrl} target="_blank" rel="noreferrer">{settings.resumeLabel || 'Download resume'}</a> : null}<Link className="meta border-b border-foreground pb-2" href="/#contact">Contact</Link></div></div></section>
+        <section className="mx-auto max-w-7xl py-24 md:py-36"><div className="flex flex-col items-start justify-between gap-8 md:flex-row md:items-end"><div><p className="meta">Continue</p><h2 className="display mt-4 text-4xl md:text-6xl">Let&apos;s make something useful.</h2></div><div className="flex flex-wrap gap-5">{settings.resumeUrl ? <a className="meta border-b border-foreground pb-2" href={settings.resumeUrl} target="_blank" rel="noreferrer">{settings.resumeLabel || 'Download resume'}</a> : null}<Link className="meta border-b border-foreground pb-2" href="/#contact">Contact</Link></div></div>        </section>
       </main>
-      <Footer identity={identity} about={about} socials={socials} note={settings.footerNote} settings={settings} />
     </>
+
   )
 }
 

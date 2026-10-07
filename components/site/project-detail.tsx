@@ -5,6 +5,7 @@ import { useRef } from 'react'
 import { useMood } from '@/components/mood/mood-provider'
 import { CmsImage } from '@/components/media/cms-image'
 import { ImageReveal, Reveal, TextSplit } from '@/components/motion/primitives'
+import { TiltCard } from '@/components/motion/phase-two-primitives'
 import { FULL_MOTION, gsap, useGSAP } from '@/lib/motion/gsap'
 import { cn } from '@/lib/utils'
 import type { Project } from '@/lib/cms/types'
@@ -37,12 +38,14 @@ export function ProjectDetail({ project, index, total, next }: { project: Projec
 
   useGSAP(
     () => {
-      gsap.matchMedia().add(FULL_MOTION, () => {
+      const mm = gsap.matchMedia()
+      mm.add(FULL_MOTION, () => {
         gsap
-          .timeline({ scrollTrigger: { trigger: heroRef.current, start: 'top top', end: 'bottom top', scrub: config.motion.scrub } })
+          .timeline({ scrollTrigger: { trigger: heroRef.current, start: 'top top', end: 'bottom top', scrub: config.motion.scrub, invalidateOnRefresh: true, immediateRender: false } })
           .to('[data-detail-cover]', { scale: 1.12, yPercent: 12, ease: 'none' }, 0)
           .to('[data-detail-title]', { yPercent: -40, opacity: 0.2, ease: 'none' }, 0)
       })
+      return () => mm.revert()
     },
     { scope: heroRef },
   )
@@ -53,7 +56,9 @@ export function ProjectDetail({ project, index, total, next }: { project: Projec
         {project.coverImage ? (
           <div className="absolute inset-0 -z-10">
             <div data-detail-cover className="h-full w-full will-change-transform">
-              <CmsImage media={project.coverImage} alt={project.coverImage.alt || project.title} priority sizes="100vw" />
+              <TiltCard className="h-full w-full">
+                <CmsImage media={project.coverImage} alt={project.coverImage.alt || project.title} priority sizes="100vw" />
+              </TiltCard>
             </div>
             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
           </div>
@@ -157,7 +162,9 @@ export function ProjectDetail({ project, index, total, next }: { project: Projec
                   wide ? 'md:col-span-8 lg:col-span-12' : i % 3 === 1 ? 'md:col-span-4 lg:col-span-7' : 'md:col-span-4 lg:col-span-5 lg:mt-24',
                 )}
               >
-                <CmsImage media={img} alt={img.alt || `${project.title} — image ${i + 1}`} sizes={wide ? '100vw' : '(min-width: 1024px) 58vw, 100vw'} />
+                <TiltCard className="h-full w-full">
+                  <CmsImage media={img} alt={img.alt || `${project.title} — image ${i + 1}`} sizes={wide ? '100vw' : '(min-width: 1024px) 58vw, 100vw'} />
+                </TiltCard>
               </ImageReveal>
             )
           })}
@@ -166,12 +173,12 @@ export function ProjectDetail({ project, index, total, next }: { project: Projec
 
       {next ? (
         <Link href={`/work/${next.slug}`} className="group block border-t border-line py-[calc(var(--section-space)*0.6)]" aria-label={`Next project: ${next.title}`}>
-          <div className="site-grid items-end gap-y-4">
+          <TiltCard className="site-grid items-end gap-y-4">
             <p className="meta col-span-4 text-muted-foreground md:col-span-8 lg:col-span-12">Next project →</p>
             <p className="display col-span-4 text-[clamp(2.75rem,10vw,10rem)] transition-transform duration-700 group-hover:translate-x-4 md:col-span-8 lg:col-span-12">
               {next.title}
             </p>
-          </div>
+          </TiltCard>
         </Link>
       ) : null}
     </article>

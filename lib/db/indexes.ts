@@ -2,7 +2,7 @@ import 'server-only'
 
 import type { Db } from 'mongodb'
 
-const indexes: Record<string, Array<{ key: Record<string, 1 | -1>; name: string; unique?: boolean }>> = {
+const indexes: Record<string, Array<{ key: Record<string, 1 | -1>; name: string; unique?: boolean; expireAfterSeconds?: number }>> = {
   projects: [
     { key: { slug: 1 }, name: 'projects_slug_unique', unique: true },
     { key: { status: 1, featured: -1, order: 1 }, name: 'projects_public_order' },
@@ -16,7 +16,7 @@ const indexes: Record<string, Array<{ key: Record<string, 1 | -1>; name: string;
     { key: { createdAt: -1 }, name: 'contact_messages_created_at' },
     { key: { idempotencyKey: 1 }, name: 'contact_messages_idempotency_unique', unique: true },
   ],
-  rate_limits: [{ key: { key: 1, windowStart: 1 }, name: 'rate_limits_key_window_unique', unique: true }],
+  rate_limits: [{ key: { key: 1, windowStart: 1 }, name: 'rate_limits_key_window_unique', unique: true }, { key: { windowStart: 1 }, name: 'rate_limits_window_ttl', expireAfterSeconds: 900 }],
   revoked_sessions: [{ key: { sessionId: 1 }, name: 'revoked_sessions_id_unique', unique: true }],
   singletons: [{ key: { key: 1 }, name: 'singletons_key_unique', unique: true }],
 }

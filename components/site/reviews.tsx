@@ -31,7 +31,8 @@ function Spotlight({ reviews }: { reviews: Review[] }) {
   useGSAP(
     () => {
       if (reviews.length < 2) return
-      gsap.matchMedia().add({ desktop: '(min-width: 768px)', motion: FULL_MOTION }, (ctx) => {
+      const mm = gsap.matchMedia()
+      mm.add({ desktop: '(min-width: 768px)', motion: FULL_MOTION }, (ctx) => {
         if (!ctx.conditions?.desktop || !ctx.conditions.motion) return
         gsap.timeline({
           scrollTrigger: {
@@ -39,11 +40,14 @@ function Spotlight({ reviews }: { reviews: Review[] }) {
             start: 'top top',
             end: `+=${reviews.length * 70}%`,
             pin: true,
-            scrub: true,
+            scrub: 0.8,
+            invalidateOnRefresh: true,
+            immediateRender: false,
             onUpdate: (s) => setActive(Math.min(reviews.length - 1, Math.floor(s.progress * reviews.length))),
           },
         })
       })
+      return () => mm.revert()
     },
     { scope: ref, dependencies: [reviews.length] },
   )

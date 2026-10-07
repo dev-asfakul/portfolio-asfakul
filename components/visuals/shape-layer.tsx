@@ -18,15 +18,17 @@ const vocabularyByMood = {
 type ShapeLayerProps = {
   mood: Mood
   scene: SceneId
+  scrollMotion?: boolean
+  cursorEnabled?: boolean
 }
 
-export function ShapeLayer({ mood, scene }: ShapeLayerProps) {
+export function ShapeLayer({ mood, scene, scrollMotion = true, cursorEnabled = true }: ShapeLayerProps) {
   const rootRef = useRef<HTMLDivElement>(null)
   const Vocabulary = vocabularyByMood[mood]
-  useSceneScroll({ rootRef, mood, scene })
+  useSceneScroll({ rootRef, mood, scene, enabled: scrollMotion })
   return (
     <div ref={rootRef} data-shape-scroll-root className="pointer-events-none absolute inset-0 z-0">
-      <Vocabulary scene={scene} />
+      <Vocabulary scene={scene} cursorEnabled={cursorEnabled} />
     </div>
   )
 }

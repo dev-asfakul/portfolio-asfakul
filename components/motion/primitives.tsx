@@ -13,7 +13,8 @@ export function Reveal({ as: Tag = 'div', className, children, delay = 0, style 
   const { config } = useMood()
   useGSAP(
     () => {
-      gsap.matchMedia().add(FULL_MOTION, () => {
+      const mm = gsap.matchMedia()
+      mm.add(FULL_MOTION, () => {
         gsap.from(ref.current, {
           y: config.motion.distance,
           autoAlpha: 0,
@@ -23,6 +24,7 @@ export function Reveal({ as: Tag = 'div', className, children, delay = 0, style 
           scrollTrigger: { trigger: ref.current, start: 'top 88%', once: true },
         })
       })
+      return () => mm.revert()
     },
     { scope: ref },
   )
@@ -39,7 +41,8 @@ export function StaggerGroup({ as: Tag = 'div', className, children }: Polymorph
   const { config } = useMood()
   useGSAP(
     () => {
-      gsap.matchMedia().add(FULL_MOTION, () => {
+      const mm = gsap.matchMedia()
+      mm.add(FULL_MOTION, () => {
         gsap.from('[data-stagger]', {
           y: config.motion.distance * 0.6,
           autoAlpha: 0,
@@ -49,6 +52,7 @@ export function StaggerGroup({ as: Tag = 'div', className, children }: Polymorph
           scrollTrigger: { trigger: ref.current, start: 'top 85%', once: true },
         })
       })
+      return () => mm.revert()
     },
     { scope: ref },
   )
