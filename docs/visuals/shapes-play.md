@@ -1,0 +1,9 @@
+# Play Shape Language
+
+Play is bold geometry and layered depth. Each scene uses three to six active shapes: circles, blobs, cut forms, stickers, and overlapping planes with saturated electric blue, acid lime, and hot pink. Shapes may cross behind and in front of one another within the declared layer stack. The composition is intentionally loud and spatial, with contrast and overlap making the scene feel assembled rather than merely colored.
+
+Motion is kinetic and interruption-friendly. Shapes use short 150-to-600ms beats, spring-like easing, overshoot, rotation, scale, and scrub-linked translation. Scroll advances the composition aggressively: forms can rotate, morph, scale, and move horizontally when the scene calls for spatial release. Entry choreography is immediate enough to feel responsive, while every timeline remains scoped, cancellable, and limited to transform, opacity, clip-path, or filter.
+
+Play shapes track the cursor through explicit behaviors declared in the vocabulary. Some forms attract, some repel, and key shapes may use a bounded magnetic pull. Cursor state changes are tied to the active layer, never to arbitrary section code. The cursor manager owns one listener/RAF loop and cleans it up on scene change. Reduced motion preserves the complete layered arrangement, overlap, palette, and hierarchy as a static composition; it removes scrub, spring, rotation, morph, and cursor response rather than hiding the shapes.
+
+Play scenes use canvas when four or more shapes or heavy motion make it the responsible choice; SVG is reserved for lighter vector scenes. The registry declares every shape’s layer, bounds, interaction mode, render choice, and static fallback. Play is successful only when its composition is unmistakably more kinetic and spatial than Editorial or Quiet, while still remaining legible and performant.
